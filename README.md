@@ -6,7 +6,9 @@ Predicting which loan applicants are likely to default, turning the model's scor
 
 ![Web scoring interface](docs/preview.png)
 
-> Live demo: _add your Render link here_ (free tier: the first request after idle may take ~1 minute to wake up)
+> **Live demo:** https://credit-risk-prediction-five.vercel.app  
+> **API docs:** https://credit-risk-prediction-five.vercel.app/docs  
+> Hosted for free on Vercel. The first request after a long idle period may take a few seconds.
 
 ---
 
@@ -32,7 +34,8 @@ A lender approves loans for many applicants. Most repay, but around **21.5% defa
 | 4 | `05_train_models` | Logistic Regression and CatBoost with class weights |
 | 5 | `06_evaluation` | ROC-AUC, PR-AUC, cost-based threshold, risk tiers, SHAP, calibration |
 | 6 | `src/predict.py` | Reusable scoring pipeline (same preprocessing as training) |
-| 7 | `api/main.py`, `web/index.html` | FastAPI scoring API and web interface |
+| 7 | `07_export_for_deploy` | Export the model and scaler to lightweight files for deployment |
+| 8 | `api/main.py`, `web/index.html` | FastAPI scoring API and web interface |
 
 ## Results
 
@@ -114,12 +117,25 @@ Example response:
 
 ```
 api/main.py            FastAPI app (/predict, /health, web page)
-src/predict.py         Preprocessing + scoring pipeline
+src/predict.py         Preprocessing + scoring pipeline (uses catboost + scikit-learn)
+src/predict_lite.py    Same pipeline without heavy libraries (used by the API)
+src/cb_model.py        CatBoost model exported as pure Python
 web/index.html         Web interface
 models/                Trained model, scaler and configs
-notebooks/             Analysis notebooks 01–06
+notebooks/             Analysis notebooks 01–07
 test_api.py            Automated API tests
+pyproject.toml         Deployment config for Vercel
 ```
+
+## Deployment
+
+The API runs on Vercel, which limits a Python function bundle to 500 MB. The original dependencies (CatBoost, scikit-learn, SciPy, pandas) were about 600 MB, so the deployed version was slimmed down:
+
+- The CatBoost model is exported to pure Python (`src/cb_model.py`), so the server does not need the `catboost` package.
+- StandardScaler is replaced by its formula, `(x - mean) / scale`, using values saved in `models/scaler_params.json`, so scikit-learn is not needed.
+- Features are cast to float32 before scoring, matching how CatBoost reads them. Without this, values sitting exactly on a tree split could land in the wrong branch (3 of 6,336 test rows differed by up to 0.019).
+
+Result: dependencies dropped from about 600 MB to about 130 MB, and `predict_lite.py` gives **identical** outputs to `predict.py` on all 31,677 rows (checked in notebook 07).
 
 ## Limitations
 
@@ -136,7 +152,7 @@ Download `credit_risk_dataset.csv` from Kaggle into `data/raw/`, then:
 pip install -r requirements-notebook.txt
 ```
 
-and run the notebooks in order (01 → 06).
+and run the notebooks in order (01 → 07).
 
 ---
 
@@ -144,7 +160,9 @@ and run the notebooks in order (01 → 06).
 
 Memprediksi peminjam yang berisiko gagal bayar, mengubah skor model menjadi keputusan bisnis berbasis biaya, lalu menyajikannya lewat API scoring (FastAPI) dengan tampilan web sederhana.
 
-> Demo online: _tambahkan link Render di sini_ (paket gratis: akses pertama setelah lama tidak dipakai bisa butuh sekitar 1 menit)
+> **Demo online:** https://credit-risk-prediction-five.vercel.app  
+> **Dokumentasi API:** https://credit-risk-prediction-five.vercel.app/docs  
+> Di-hosting gratis di Vercel. Akses pertama setelah lama tidak dipakai bisa butuh beberapa detik.
 
 ## Masalah bisnis
 
@@ -168,7 +186,8 @@ Pemberi pinjaman menyetujui pinjaman untuk banyak orang. Sebagian besar membayar
 | 4 | `05_train_models` | Logistic Regression dan CatBoost dengan bobot kelas |
 | 5 | `06_evaluation` | ROC-AUC, PR-AUC, threshold berbasis biaya, risk tier, SHAP, kalibrasi |
 | 6 | `src/predict.py` | Pipeline scoring yang bisa dipakai ulang (preprocessing sama dengan saat training) |
-| 7 | `api/main.py`, `web/index.html` | API scoring FastAPI dan tampilan web |
+| 7 | `07_export_for_deploy` | Ekspor model dan scaler ke file ringan untuk deploy |
+| 8 | `api/main.py`, `web/index.html` | API scoring FastAPI dan tampilan web |
 
 ## Hasil
 
@@ -219,6 +238,16 @@ Contoh request dan response `POST /predict` ada di bagian bahasa Inggris di atas
 - `GET /health` menampilkan status API dan threshold yang sedang dipakai.
 - `python test_api.py` menjalankan tes otomatis (peminjam aman, peminjam berisiko, dan input salah) saat API sedang berjalan.
 
+## Deploy
+
+API berjalan di Vercel, yang membatasi ukuran fungsi Python maksimal 500 MB. Library aslinya (CatBoost, scikit-learn, SciPy, pandas) sekitar 600 MB, jadi versi online dibuat lebih ramping:
+
+- Model CatBoost diekspor menjadi kode Python murni (`src/cb_model.py`), sehingga server tidak perlu library `catboost`.
+- StandardScaler diganti dengan rumusnya, `(x - mean) / scale`, memakai nilai yang disimpan di `models/scaler_params.json`, sehingga scikit-learn tidak diperlukan.
+- Fitur diubah ke float32 sebelum dihitung, sama seperti cara CatBoost membacanya. Tanpa ini, nilai yang tepat berada di batas cabang pohon bisa masuk ke cabang yang salah (3 dari 6.336 baris data test berbeda hingga 0,019).
+
+Hasilnya: ukuran library turun dari sekitar 600 MB menjadi sekitar 130 MB, dan `predict_lite.py` memberi hasil yang **sama persis** dengan `predict.py` di seluruh 31.677 baris (dicek di notebook 07).
+
 ## Batasan
 
 - Biaya kesalahan $500 dan $50 adalah asumsi, bukan data kerugian asli. Threshold optimal bergantung pada asumsi ini.
@@ -234,7 +263,7 @@ Unduh `credit_risk_dataset.csv` dari Kaggle ke folder `data/raw/`, lalu:
 pip install -r requirements-notebook.txt
 ```
 
-dan jalankan notebook secara berurutan (01 → 06).
+dan jalankan notebook secara berurutan (01 → 07).
 
 ---
 
