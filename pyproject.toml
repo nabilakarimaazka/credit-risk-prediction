@@ -1,0 +1,20 @@
+# Konfigurasi untuk deploy ke Vercel.
+# Vercel membaca daftar library dari sini (prioritasnya di atas requirements.txt),
+# jadi isi "dependencies" harus sama dengan requirements.txt.
+[project]
+name = "credit-risk-prediction"
+version = "1.0.0"
+description = "Credit risk scoring API (FastAPI + CatBoost) with a web page"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.163.1",
+    "uvicorn==0.54.0",
+    "pydantic==2.14.3",
+    "pandas==3.1.1",
+    "numpy==2.5.4",
+    "joblib==1.6.0",
+]
+
+# Lokasi aplikasi FastAPI: variabel "app" di dalam api/main.py
+[tool.vercel]
+entrypoint = "api.main:app"

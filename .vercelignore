@@ -1,0 +1,15 @@
+# File yang tidak perlu ikut di-upload ke Vercel (tidak dipakai API)
+.venv
+notebooks
+data
+docs
+video_narasi
+streamlit_app.py
+Dockerfile
+test_api.py
+requirements-notebook.txt
+src/predict.py
+models/cb_model.cbm
+models/scaler.pkl
+models/lr_model.pkl
+models/isotonic_calibrator.pkl

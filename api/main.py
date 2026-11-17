@@ -6,7 +6,7 @@ import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from src.predict import predict_risk, scoring_config
+from src.predict_lite import predict_risk, scoring_config
 
 app = FastAPI(title="Credit Risk Scoring API")
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"

@@ -1,5 +1,7 @@
-# Library tambahan untuk menjalankan notebook analisis dan tes API
+# Library tambahan untuk melatih model, menjalankan notebook, dan tes API
 -r requirements.txt
+scikit-learn==1.9.1
+catboost==1.2.10
 pyarrow==26.0.1
 matplotlib==3.11.2
 seaborn==0.13.2
