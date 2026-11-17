@@ -1,0 +1,9 @@
+# Library untuk menjalankan API dan halaman scoring (dipakai juga saat deploy)
+fastapi==0.163.1
+uvicorn==0.54.0
+pydantic==2.14.3
+pandas==3.1.1
+numpy==2.5.4
+scikit-learn==1.9.1
+catboost==1.2.10
+joblib==1.6.0

@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+
+# Cache Python dan Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Log training CatBoost
+catboost_info/
+notebooks/catboost_info/
+
+# Data (unduh sendiri dari Kaggle, lihat README)
+data/raw/
+data/processed/
+
+# File video dan suara narasi (terlalu besar untuk repo)
+video_narasi/
+
+# Pengaturan editor dan sistem
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
